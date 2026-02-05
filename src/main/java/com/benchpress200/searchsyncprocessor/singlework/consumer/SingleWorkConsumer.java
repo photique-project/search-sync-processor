@@ -4,6 +4,7 @@ import com.benchpress200.searchsyncprocessor.common.constant.EventHeaderKey;
 import com.benchpress200.searchsyncprocessor.common.constant.EventType;
 import com.benchpress200.searchsyncprocessor.common.exception.OutboxPayloadDeserializationException;
 import com.benchpress200.searchsyncprocessor.singlework.consumer.payload.SingleWorkEventPayload;
+import com.benchpress200.searchsyncprocessor.singlework.dispatch.SingleWorkEventDispatcher;
 import com.benchpress200.searchsyncprocessor.util.EventParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import org.springframework.kafka.annotation.BackOff;
+import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.stereotype.Component;
@@ -20,8 +22,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SingleWorkConsumer {
     private final ObjectMapper objectMapper;
+    private final SingleWorkEventDispatcher singleWorkEventDispatcher;
 
-    // TODO: 데드레터 토픽에 쌓인 메시지 처리 방식 수립 필요
     @RetryableTopic(
             attempts = "${spring.kafka.consumer.retry.attempts}",
             backOff = @BackOff(
@@ -36,29 +38,31 @@ public class SingleWorkConsumer {
             topics = "${spring.kafka.topics.singlework}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
-    public void consume(
-            ConsumerRecord<String, String> consumerRecord
-    ) {
-        Long eventId = EventParser.getLongHeader(consumerRecord, EventHeaderKey.EVENT_ID);
-        String eventType = EventParser.getStringHeader(consumerRecord, EventHeaderKey.EVENT_TYPE);
+    public void consume(ConsumerRecord<String, String> record) {
+        Long eventId = EventParser.getLongHeader(record, EventHeaderKey.EVENT_ID);
+        String eventType = EventParser.getStringHeader(record, EventHeaderKey.EVENT_TYPE);
         SingleWorkEventPayload payload = EventParser.getPayload(
-                consumerRecord,
+                record,
                 SingleWorkEventPayload.class,
                 objectMapper
         );
 
-        switch (eventType) {
-            case EventType.CREATED:
-                break;
-            case EventType.UPDATED:
-                break;
-            case EventType.UPDATED_VIEW_COUNT:
-                break;
-            case EventType.DELETED:
-                break;
-            default:
-                // 에러 로깅
-        }
+        // 빈으로 등록한 타입에 맞는 핸들러 찾아서 실행
+        singleWorkEventDispatcher.dispatch(
+                eventType,
+                eventId,
+                payload
+        );
     }
 
+    @DltHandler
+    public void handleDltEvent(ConsumerRecord<String, String> record) {
+        log.error(
+                "DLT topic={}, partition={}, offset={}, key={}",
+                record.topic(),
+                record.partition(),
+                record.offset(),
+                record.key()
+        );
+    }
 }

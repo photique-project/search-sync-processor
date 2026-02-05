@@ -15,8 +15,6 @@ public class EventParser {
             Class<T> payloadType,
             ObjectMapper objectMapper
     ) {
-        // 오브젝트매퍼 어떻게 사용할지 주입은 어떻게 받을지 생각
-
         try {
             return objectMapper.readValue(record.value(), payloadType);
         } catch (JsonProcessingException e) {
