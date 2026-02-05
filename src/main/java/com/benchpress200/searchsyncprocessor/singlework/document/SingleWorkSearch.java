@@ -112,4 +112,26 @@ public class SingleWorkSearch {
                 .lastProcessedOutboxEventId(eventId)
                 .build();
     }
+
+    public void update(
+            Long eventId,
+            SingleWorkEventPayload singleWorkEventPayload
+    ) {
+        image = singleWorkEventPayload.getImage();
+        title = singleWorkEventPayload.getTitle();
+        description = singleWorkEventPayload.getDescription();
+        tags = singleWorkEventPayload.getTags();
+        category = singleWorkEventPayload.getCategory();
+        viewCount = singleWorkEventPayload.getViewCount();
+        likeCount = singleWorkEventPayload.getLikeCount();
+        lastProcessedOutboxEventId = eventId;
+    }
+
+    public void updateViewCount(
+            Long eventId,
+            SingleWorkEventPayload singleWorkEventPayload
+    ) {
+        viewCount = singleWorkEventPayload.getViewCount();
+        lastProcessedOutboxEventId = eventId;
+    }
 }

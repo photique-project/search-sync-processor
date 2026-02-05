@@ -1,8 +1,7 @@
 package com.benchpress200.searchsyncprocessor.singlework.consumer;
 
 import com.benchpress200.searchsyncprocessor.common.constant.EventHeaderKey;
-import com.benchpress200.searchsyncprocessor.common.constant.EventType;
-import com.benchpress200.searchsyncprocessor.common.exception.OutboxPayloadDeserializationException;
+import com.benchpress200.searchsyncprocessor.singlework.consumer.exception.NonRetryableEventException;
 import com.benchpress200.searchsyncprocessor.singlework.consumer.payload.SingleWorkEventPayload;
 import com.benchpress200.searchsyncprocessor.singlework.dispatch.SingleWorkEventDispatcher;
 import com.benchpress200.searchsyncprocessor.util.EventParser;
@@ -32,7 +31,7 @@ public class SingleWorkConsumer {
                     maxDelay = 30000L
             ),
             dltTopicSuffix = "${spring.kafka.consumer.retry.dlt-suffix}",
-            exclude = { OutboxPayloadDeserializationException.class } // 역직렬화 실패는 바로 dlt
+            exclude = { NonRetryableEventException.class }
     )
     @KafkaListener(
             topics = "${spring.kafka.topics.singlework}",
@@ -41,18 +40,27 @@ public class SingleWorkConsumer {
     public void consume(ConsumerRecord<String, String> record) {
         Long eventId = EventParser.getLongHeader(record, EventHeaderKey.EVENT_ID);
         String eventType = EventParser.getStringHeader(record, EventHeaderKey.EVENT_TYPE);
-        SingleWorkEventPayload payload = EventParser.getPayload(
-                record,
-                SingleWorkEventPayload.class,
-                objectMapper
-        );
 
-        // 빈으로 등록한 타입에 맞는 핸들러 찾아서 실행
-        singleWorkEventDispatcher.dispatch(
-                eventType,
-                eventId,
-                payload
-        );
+        try {
+            SingleWorkEventPayload payload = EventParser.getPayload(
+                    record,
+                    SingleWorkEventPayload.class,
+                    objectMapper
+            );
+
+            // ES에서 업데이트하는데 해당 문서 못찾았으면 생성 이벤트에서 dlt에 먼저 들어간 경우도 있기 때문에
+            // dlt로 이동시킴
+
+            // 빈으로 등록한 타입에 맞는 핸들러 찾아서 실행
+            singleWorkEventDispatcher.dispatch(
+                    eventType,
+                    eventId,
+                    payload
+            );
+        } catch (NonRetryableEventException e) {
+            log.error(e.getMessage());
+            throw e;
+        }
     }
 
     @DltHandler
