@@ -18,7 +18,10 @@ public class SingleWorkDeletedEventHandler implements SingleWorkEventHandler {
     }
 
     @Override
-    public void handle(Long eventId, SingleWorkEventPayload payload) {
+    public void handle(
+            Long eventId,
+            SingleWorkEventPayload payload
+    ) {
         Long singleWorkId = payload.getId();
 
         singleWorkSearchRepository.findById(singleWorkId)

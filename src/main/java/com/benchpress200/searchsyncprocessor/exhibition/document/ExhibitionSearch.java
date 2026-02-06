@@ -1,6 +1,6 @@
-package com.benchpress200.searchsyncprocessor.singlework.document;
+package com.benchpress200.searchsyncprocessor.exhibition.document;
 
-import com.benchpress200.searchsyncprocessor.singlework.consumer.payload.SingleWorkEventPayload;
+import com.benchpress200.searchsyncprocessor.exhibition.consumer.payload.ExhibitionEventPayload;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -25,12 +25,12 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 @Getter
 @Builder
 @Document(
-        indexName = "singleworks",
+        indexName = "exhibitions",
         writeTypeHint = WriteTypeHint.FALSE
 )
 @Setting(settingPath = "elasticsearch/settings.json")
-@Mapping(mappingPath = "elasticsearch/singleworks-mappings.json")
-public class SingleWorkSearch {
+@Mapping(mappingPath = "elasticsearch/exhibitions-mappings.json")
+public class ExhibitionSearch {
     @Id
     @Field(type = FieldType.Long)
     private Long id;
@@ -39,7 +39,7 @@ public class SingleWorkSearch {
     private Writer writer;
 
     @Field(type = FieldType.Keyword, index = false)
-    private String image;
+    private String cardColor;
 
     @Field(type = FieldType.Text)
     private String title;
@@ -50,14 +50,11 @@ public class SingleWorkSearch {
     @Field(type = FieldType.Text)
     private List<String> tags;
 
-    @Field(type = FieldType.Keyword)
-    private String category;
+    @Field(type = FieldType.Long)
+    private Long viewCount;
 
     @Field(type = FieldType.Long)
     private Long likeCount;
-
-    @Field(type = FieldType.Long)
-    private Long viewCount;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
@@ -86,7 +83,7 @@ public class SingleWorkSearch {
         @Field(type = FieldType.Keyword, index = false)
         private String profileImage;
 
-        public static Writer from(SingleWorkEventPayload.Writer writer) {
+        public static Writer from(ExhibitionEventPayload.Writer writer) {
             return Writer.builder()
                     .id(writer.getId())
                     .nickname(writer.getNickname())
@@ -95,46 +92,44 @@ public class SingleWorkSearch {
         }
     }
 
-    public static SingleWorkSearch of(
-        Long eventId,
-        SingleWorkEventPayload singleWorkEventPayload
+    public static ExhibitionSearch of(
+            Long eventId,
+            ExhibitionEventPayload exhibitionEventPayload
     ) {
-        return SingleWorkSearch.builder()
-                .id(singleWorkEventPayload.getId())
-                .writer(Writer.from(singleWorkEventPayload.getWriter()))
-                .image(singleWorkEventPayload.getImage())
-                .title(singleWorkEventPayload.getTitle())
-                .description(singleWorkEventPayload.getDescription())
-                .tags(singleWorkEventPayload.getTags())
-                .category(singleWorkEventPayload.getCategory())
-                .viewCount(singleWorkEventPayload.getViewCount())
-                .likeCount(singleWorkEventPayload.getLikeCount())
-                .createdAt(singleWorkEventPayload.getCreatedAt())
-                .updatedAt(singleWorkEventPayload.getUpdatedAt())
+        return ExhibitionSearch.builder()
+                .id(exhibitionEventPayload.getId())
+                .writer(ExhibitionSearch.Writer.from(exhibitionEventPayload.getWriter()))
+                .cardColor(exhibitionEventPayload.getCardColor())
+                .title(exhibitionEventPayload.getTitle())
+                .description(exhibitionEventPayload.getDescription())
+                .tags(exhibitionEventPayload.getTags())
+                .viewCount(exhibitionEventPayload.getViewCount())
+                .likeCount(exhibitionEventPayload.getLikeCount())
+                .createdAt(exhibitionEventPayload.getCreatedAt())
+                .updatedAt(exhibitionEventPayload.getUpdatedAt())
                 .lastProcessedOutboxEventId(eventId)
                 .build();
     }
 
     public void update(
             Long eventId,
-            SingleWorkEventPayload singleWorkEventPayload
+            ExhibitionEventPayload exhibitionEventPayload
     ) {
-        image = singleWorkEventPayload.getImage();
-        title = singleWorkEventPayload.getTitle();
-        description = singleWorkEventPayload.getDescription();
-        tags = singleWorkEventPayload.getTags();
-        category = singleWorkEventPayload.getCategory();
-        likeCount = singleWorkEventPayload.getLikeCount();
-        createdAt = singleWorkEventPayload.getCreatedAt();
-        updatedAt = singleWorkEventPayload.getUpdatedAt();
+        cardColor = exhibitionEventPayload.getCardColor();
+        title = exhibitionEventPayload.getTitle();
+        description = exhibitionEventPayload.getDescription();
+        tags = exhibitionEventPayload.getTags();
+        likeCount = exhibitionEventPayload.getLikeCount();
+        createdAt = exhibitionEventPayload.getCreatedAt();
+        updatedAt = exhibitionEventPayload.getUpdatedAt();
         lastProcessedOutboxEventId = eventId;
     }
 
     public void updateViewCount(
             Long eventId,
-            SingleWorkEventPayload singleWorkEventPayload
+            ExhibitionEventPayload exhibitionEventPayload
     ) {
-        viewCount = singleWorkEventPayload.getViewCount();
+        viewCount = exhibitionEventPayload.getViewCount();
         lastProcessedOutboxEventId = eventId;
     }
 }

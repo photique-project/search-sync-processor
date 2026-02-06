@@ -1,15 +1,15 @@
-package com.benchpress200.searchsyncprocessor.singlework.consumer;
+package com.benchpress200.searchsyncprocessor.exhibition.consumer;
 
 import com.benchpress200.searchsyncprocessor.common.constant.EventHeaderKey;
+import com.benchpress200.searchsyncprocessor.exhibition.consumer.payload.ExhibitionEventPayload;
+import com.benchpress200.searchsyncprocessor.exhibition.dispatch.ExhibitionEventDispatcher;
 import com.benchpress200.searchsyncprocessor.singlework.consumer.exception.NonRetryableEventException;
 import com.benchpress200.searchsyncprocessor.singlework.consumer.payload.SingleWorkEventPayload;
-import com.benchpress200.searchsyncprocessor.singlework.dispatch.SingleWorkEventDispatcher;
 import com.benchpress200.searchsyncprocessor.util.EventParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SingleWorkConsumer {
+public class ExhibitionConsumer {
     private final ObjectMapper objectMapper;
-    private final SingleWorkEventDispatcher singleWorkEventDispatcher;
+    private final ExhibitionEventDispatcher exhibitionEventDispatcher;
 
     @RetryableTopic(
             attempts = "${spring.kafka.consumer.retry.attempts}",
@@ -34,7 +34,7 @@ public class SingleWorkConsumer {
             exclude = { NonRetryableEventException.class }
     )
     @KafkaListener(
-            topics = "${spring.kafka.topics.singlework}",
+            topics = "${spring.kafka.topics.exhibition}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void consume(ConsumerRecord<String, String> record) {
@@ -42,14 +42,14 @@ public class SingleWorkConsumer {
         String eventType = EventParser.getStringHeader(record, EventHeaderKey.EVENT_TYPE);
 
         try {
-            SingleWorkEventPayload payload = EventParser.getPayload(
+            ExhibitionEventPayload payload = EventParser.getPayload(
                     record,
-                    SingleWorkEventPayload.class,
+                    ExhibitionEventPayload.class,
                     objectMapper
             );
 
             // 빈으로 등록한 타입에 맞는 핸들러 찾아서 실행
-            singleWorkEventDispatcher.dispatch(
+            exhibitionEventDispatcher.dispatch(
                     eventType,
                     eventId,
                     payload

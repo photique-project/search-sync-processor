@@ -1,7 +1,7 @@
 package com.benchpress200.searchsyncprocessor.singlework.dispatch;
 
 import com.benchpress200.searchsyncprocessor.singlework.consumer.payload.SingleWorkEventPayload;
-import com.benchpress200.searchsyncprocessor.singlework.dispatch.exception.HandlerNotFoundException;
+import com.benchpress200.searchsyncprocessor.singlework.dispatch.exception.SingleWorkEventHandlerNotFoundException;
 import com.benchpress200.searchsyncprocessor.singlework.handler.SingleWorkEventHandler;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +19,15 @@ public class SingleWorkEventDispatcher {
                 ));
     }
 
-    public void dispatch(String eventType, Long eventId, SingleWorkEventPayload payload) {
+    public void dispatch(
+            String eventType,
+            Long eventId,
+            SingleWorkEventPayload payload
+    ) {
         SingleWorkEventHandler handler = handlers.get(eventType);
 
         if (handler == null) {
-            throw new HandlerNotFoundException(eventType);
+            throw new SingleWorkEventHandlerNotFoundException(eventType);
         }
 
         handler.handle(eventId, payload);
