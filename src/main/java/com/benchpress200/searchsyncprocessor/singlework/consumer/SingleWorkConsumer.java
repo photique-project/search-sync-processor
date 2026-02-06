@@ -38,6 +38,7 @@ public class SingleWorkConsumer {
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void consume(ConsumerRecord<String, String> record) {
+        long start = System.currentTimeMillis();
         Long eventId = EventParser.getLongHeader(record, EventHeaderKey.EVENT_ID);
         String eventType = EventParser.getStringHeader(record, EventHeaderKey.EVENT_TYPE);
 
@@ -54,20 +55,61 @@ public class SingleWorkConsumer {
                     eventId,
                     payload
             );
+
+            long elapsed = System.currentTimeMillis() - start;
+
+            log.info(
+                    "Consume success: eventId={}, eventType={}, aggregateId={}, topic={}, partition={}, offset={}, elapsed={}ms",
+                    eventId,
+                    eventType,
+                    payload.getId(),
+                    record.topic(),
+                    record.partition(),
+                    record.offset(),
+                    elapsed
+            );
+
         } catch (NonRetryableEventException e) {
-            log.error(e.getMessage());
+            log.error(
+                    "Consume failed (non-retryable): eventId={}, eventType={}, topic={}, partition={}, offset={}, reason={}",
+                    eventId,
+                    eventType,
+                    record.topic(),
+                    record.partition(),
+                    record.offset(),
+                    e.getMessage(),
+                    e
+            );
+            throw e;
+        } catch (RuntimeException e) {
+            log.warn(
+                    "Consume failed (will retry): eventId={}, eventType={}, topic={}, partition={}, offset={}, reason={}",
+                    eventId,
+                    eventType,
+                    record.topic(),
+                    record.partition(),
+                    record.offset(),
+                    e.getMessage()
+            );
+
             throw e;
         }
     }
 
     @DltHandler
     public void handleDltEvent(ConsumerRecord<String, String> record) {
+        Long eventId = EventParser.getLongHeader(record, EventHeaderKey.EVENT_ID);
+        String eventType = EventParser.getStringHeader(record, EventHeaderKey.EVENT_TYPE);
+
         log.error(
-                "DLT topic={}, partition={}, offset={}, key={}",
+                "Consume sent to DLT: eventId={}, eventType={}, key={}, topic={}, partition={}, offset={}, headers={}",
+                eventId,
+                eventType,
+                record.key(),
                 record.topic(),
                 record.partition(),
                 record.offset(),
-                record.key()
+                record.headers()
         );
     }
 }
