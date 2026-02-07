@@ -29,6 +29,6 @@ public class UserUpdatedEventHandler implements UserEventHandler {
         singleWorkSearchRepository.updateWriter(eventId, payload);
 
         // 업데이트 유저 소유 전시회의 작가 정보 업데이트
-
+        exhibitionSearchRepository.updateWriter(eventId, payload);
     }
 }
