@@ -3,10 +3,8 @@ package com.benchpress200.searchsyncprocessor.singlework.consumer.payload;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 public class SingleWorkEventPayload {
     private Long id;
     private Writer writer;
@@ -21,7 +19,6 @@ public class SingleWorkEventPayload {
     private LocalDateTime updatedAt;
 
     @Getter
-    @NoArgsConstructor
     public static class Writer {
         private Long id;
         private String nickname;

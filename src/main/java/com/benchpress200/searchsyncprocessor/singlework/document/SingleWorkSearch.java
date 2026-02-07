@@ -70,7 +70,7 @@ public class SingleWorkSearch {
     private LocalDateTime updatedAt;
 
     @Field(type = FieldType.Long)
-    private Long lastProcessedOutboxEventId;
+    private Long lastProcessedEventId;
 
     @Getter
     @NoArgsConstructor
@@ -85,6 +85,9 @@ public class SingleWorkSearch {
 
         @Field(type = FieldType.Keyword, index = false)
         private String profileImage;
+
+        @Field(type = FieldType.Long)
+        private Long lastProcessedEventId;
 
         public static Writer from(SingleWorkEventPayload.Writer writer) {
             return Writer.builder()
@@ -111,7 +114,7 @@ public class SingleWorkSearch {
                 .likeCount(singleWorkEventPayload.getLikeCount())
                 .createdAt(singleWorkEventPayload.getCreatedAt())
                 .updatedAt(singleWorkEventPayload.getUpdatedAt())
-                .lastProcessedOutboxEventId(eventId)
+                .lastProcessedEventId(eventId)
                 .build();
     }
 
@@ -127,14 +130,10 @@ public class SingleWorkSearch {
         likeCount = singleWorkEventPayload.getLikeCount();
         createdAt = singleWorkEventPayload.getCreatedAt();
         updatedAt = singleWorkEventPayload.getUpdatedAt();
-        lastProcessedOutboxEventId = eventId;
+        lastProcessedEventId = eventId;
     }
 
-    public void updateViewCount(
-            Long eventId,
-            SingleWorkEventPayload singleWorkEventPayload
-    ) {
+    public void updateViewCount(SingleWorkEventPayload singleWorkEventPayload) {
         viewCount = singleWorkEventPayload.getViewCount();
-        lastProcessedOutboxEventId = eventId;
     }
 }

@@ -67,7 +67,7 @@ public class ExhibitionSearch {
     private LocalDateTime updatedAt;
 
     @Field(type = FieldType.Long)
-    private Long lastProcessedOutboxEventId;
+    private Long lastProcessedEventId;
 
     @Getter
     @NoArgsConstructor
@@ -82,6 +82,9 @@ public class ExhibitionSearch {
 
         @Field(type = FieldType.Keyword, index = false)
         private String profileImage;
+
+        @Field(type = FieldType.Long)
+        private Long lastProcessedEventId;
 
         public static Writer from(ExhibitionEventPayload.Writer writer) {
             return Writer.builder()
@@ -107,7 +110,7 @@ public class ExhibitionSearch {
                 .likeCount(exhibitionEventPayload.getLikeCount())
                 .createdAt(exhibitionEventPayload.getCreatedAt())
                 .updatedAt(exhibitionEventPayload.getUpdatedAt())
-                .lastProcessedOutboxEventId(eventId)
+                .lastProcessedEventId(eventId)
                 .build();
     }
 
@@ -122,14 +125,10 @@ public class ExhibitionSearch {
         likeCount = exhibitionEventPayload.getLikeCount();
         createdAt = exhibitionEventPayload.getCreatedAt();
         updatedAt = exhibitionEventPayload.getUpdatedAt();
-        lastProcessedOutboxEventId = eventId;
+        lastProcessedEventId = eventId;
     }
 
-    public void updateViewCount(
-            Long eventId,
-            ExhibitionEventPayload exhibitionEventPayload
-    ) {
+    public void updateViewCount(ExhibitionEventPayload exhibitionEventPayload) {
         viewCount = exhibitionEventPayload.getViewCount();
-        lastProcessedOutboxEventId = eventId;
     }
 }
