@@ -136,4 +136,13 @@ public class SingleWorkSearch {
     public void updateViewCount(SingleWorkEventPayload singleWorkEventPayload) {
         viewCount = singleWorkEventPayload.getViewCount();
     }
+
+    public void updateLikeCount(SingleWorkEventPayload singleWorkEventPayload) {
+        likeCount = singleWorkEventPayload.getLikeCount();
+    }
+
+    // 인자로 전달받은 이벤트 아이디 이후에 처리된 최신 이벤트가 있는지 확인
+    public boolean shouldIgnoreEvent(Long incomingEventId) {
+        return lastProcessedEventId != null && incomingEventId <= lastProcessedEventId;
+    }
 }

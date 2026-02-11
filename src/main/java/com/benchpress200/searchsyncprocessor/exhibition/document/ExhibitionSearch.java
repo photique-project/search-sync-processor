@@ -131,4 +131,13 @@ public class ExhibitionSearch {
     public void updateViewCount(ExhibitionEventPayload exhibitionEventPayload) {
         viewCount = exhibitionEventPayload.getViewCount();
     }
+
+    public void updateLikeCount(ExhibitionEventPayload exhibitionEventPayload) {
+        likeCount = exhibitionEventPayload.getLikeCount();
+    }
+
+    // 인자로 전달받은 이벤트 아이디 이후에 처리된 최신 이벤트가 있는지 확인
+    public boolean shouldIgnoreEvent(Long incomingEventId) {
+        return lastProcessedEventId != null && incomingEventId <= lastProcessedEventId;
+    }
 }
