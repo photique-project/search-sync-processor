@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SingleWorkViewCountUpdatedEventHandler implements SingleWorkEventHandler {
+public class SingleWorkLikedEventHandler implements SingleWorkEventHandler {
     private final SingleWorkSearchRepository singleWorkSearchRepository;
 
     @Override
     public String getEventType() {
-        return EventType.VIEW_COUNT_UPDATED;
+        return EventType.LIKED;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class SingleWorkViewCountUpdatedEventHandler implements SingleWorkEventHa
             return;
         }
 
-        singleWorkSearch.updateViewCount(payload);
+        singleWorkSearch.updateLikeCount(payload);
         singleWorkSearchRepository.save(singleWorkSearch);
     }
 }

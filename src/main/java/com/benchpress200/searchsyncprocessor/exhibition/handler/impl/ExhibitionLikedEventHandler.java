@@ -11,19 +11,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ExhibitionLikeCountUpdatedEventHandler implements ExhibitionEventHandler {
+public class ExhibitionLikedEventHandler implements ExhibitionEventHandler {
     private final ExhibitionSearchRepository exhibitionSearchRepository;
 
     @Override
     public String getEventType() {
-        return EventType.VIEW_COUNT_UPDATED;
+        return EventType.LIKED;
     }
 
     @Override
     public void handle(
             Long eventId,
             ExhibitionEventPayload payload
-    ) {Long exhibitionId = payload.getId();
+    ) {
+        Long exhibitionId = payload.getId();
 
         ExhibitionSearch exhibitionSearch = exhibitionSearchRepository.findById(exhibitionId)
                 .orElseThrow(() -> new ExhibitionSearchNotFoundException(exhibitionId));

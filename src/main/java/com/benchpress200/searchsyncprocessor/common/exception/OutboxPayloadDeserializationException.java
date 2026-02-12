@@ -1,7 +1,9 @@
 package com.benchpress200.searchsyncprocessor.common.exception;
 
-public class OutboxPayloadDeserializationException extends RuntimeException {
+import com.benchpress200.searchsyncprocessor.singlework.consumer.exception.NonRetryableEventException;
+
+public class OutboxPayloadDeserializationException extends NonRetryableEventException {
     public OutboxPayloadDeserializationException() {
-        super();
+        super("Failed to deserialize outbox event payload");
     }
 }

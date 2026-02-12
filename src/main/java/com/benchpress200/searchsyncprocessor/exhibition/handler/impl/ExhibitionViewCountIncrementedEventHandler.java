@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ExhibitionViewCountUpdatedEventHandler implements ExhibitionEventHandler {
+public class ExhibitionViewCountIncrementedEventHandler implements ExhibitionEventHandler {
     private final ExhibitionSearchRepository exhibitionSearchRepository;
 
     @Override
     public String getEventType() {
-        return EventType.VIEW_COUNT_UPDATED;
+        return EventType.VIEW_COUNT_INCREMENTED;
     }
 
     @Override
